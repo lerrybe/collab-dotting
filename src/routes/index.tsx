@@ -8,7 +8,7 @@ export default function Routing() {
     <BrowserRouter>
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/:docAddress' element={<Document />} />
+        <Route path='/:docId' element={<Document />} />
       </Routes>
     </BrowserRouter>
   );

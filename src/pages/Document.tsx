@@ -20,6 +20,8 @@ import {
 } from 'dotting';
 import yorkie, { Indexable, JSONArray } from 'yorkie-js-sdk';
 
+// 🚨 TODO: Splitting the code into functional units.
+
 export default function Document() {
   /* DOCUMENT ID */
   const { docId } = useParams<{ docId: string }>();

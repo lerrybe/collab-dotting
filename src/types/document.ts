@@ -1,10 +1,9 @@
-import { JSONArray, JSONObject } from 'yorkie-js-sdk';
-import { ColorChangeItem, PixelModifyItem } from 'dotting';
+import { PixelModifyItem } from 'dotting';
+import { JSONObject } from 'yorkie-js-sdk';
 
 export type DottingDoc = {
-  indices: JSONObject<Indices>;
-  strokedPixels: JSONArray<ColorChangeItem>;
   data: YorkieData;
+  indices: JSONObject<Indices>;
 };
 
 export type Indices = {
@@ -14,4 +13,4 @@ export type Indices = {
   rightColumnIndex: number;
 };
 
-export type YorkieData = Record<number, Record<number, PixelModifyItem>>;
+export type YorkieData = Record<string, Record<string, PixelModifyItem>>;

@@ -1,24 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
-import {
-  convertDottingDataToYorkieData,
-  convertYorkieDataToDottingArray,
-} from '../utils/typeConverting.js';
-import { DottingDoc, Indices } from '../types/document.js';
+import { DottingDoc } from '../types/document.js';
 import { initialDataArray, initialIndices } from '../data/initialData.js';
 
-import {
-  Dotting,
-  useData,
-  useDotting,
-  useHandlers,
-  DottingRef,
-  DottingData,
-  PixelModifyItem,
-  ColorChangeItem,
-} from 'dotting';
-import yorkie, { Indexable, JSONArray } from 'yorkie-js-sdk';
+import yorkie, { DocEvent, Indexable, JSONArray } from 'yorkie-js-sdk';
+import { Dotting, useData, useDotting, useHandlers, DottingRef, PixelModifyItem } from 'dotting';
 
 // 🚨 TODO: Splitting the code into functional units.
 
@@ -27,151 +14,164 @@ export default function Document() {
   const { docId } = useParams<{ docId: string }>();
 
   /* YORKIE */
-  const [doc] = useState<yorkie.Document<DottingDoc>>(() => new yorkie.Document<DottingDoc>(docId));
-  const [client] = useState<yorkie.Client<Indexable>>(
-    () =>
-      new yorkie.Client(import.meta.env.VITE_YORKIE_API_ADDR, {
-        apiKey: import.meta.env.VITE_YORKIE_API_KEY,
-      }),
-  );
+  const [doc, setDoc] = useState<yorkie.Document<DottingDoc>>();
+  const [client, setClient] = useState<yorkie.Client<Indexable>>();
+  const [isMultiplayerReady, setIsMultiplayerReady] = useState<boolean>(false);
 
   /* DOTTING */
   const ref = useRef<DottingRef>(null);
-  const {
-    addStrokeEndListener,
-    addGridChangeListener,
-    removeStrokeEndListener,
-    removeGridChangeListener,
-  } = useHandlers(ref);
-  const { data: dottingData } = useData(ref);
-  const { colorPixels } = useDotting(ref);
+  const { addStrokeEndListener, removeStrokeEndListener } = useHandlers(ref);
+  const { data, dataArray } = useData(ref);
+  const { colorPixels, setData } = useDotting(ref);
 
   /* LOCAL STATES */
-  const [localData, setLocalData] = useState<DottingData>(dottingData);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [strokedPixels, setStrokedPixels] = useState<JSONArray<ColorChangeItem>>([]);
-  const [initDottingArray, setInitDottingArray] =
-    useState<Array<Array<PixelModifyItem>>>(initialDataArray);
+  const isDataLoaded = useMemo(() => {
+    return dataArray.length !== 0;
+  }, [dataArray]);
 
-  /* ACTIONS For update remote (yorkie) document */
-  const actions = {
-    updateData: () => {
+  // TODO data 로딩학 때까지는 보이지 않게
+
+  useEffect(() => {
+    const updateData = ({ strokedPixels }) => {
       doc?.update((root) => {
-        // 🚨 TODO: update remote (yorkie) data
-        /*
-          const updatedData = copyYorkieData(root.data);
-          strokedPixels.forEach((item) => {
-            const { color, rowIndex, columnIndex } = item;
-            updatedData[rowIndex][columnIndex] = { color, rowIndex, columnIndex };
-          });
-          root.data = updatedData;
-        */
-      });
-    },
-    updateStrokedPixels: (strokedPixels: Array<ColorChangeItem>) => {
-      doc?.update((root) => {
-        root.strokedPixels = strokedPixels;
-      });
-    },
-    updateGrid: (indices: Indices) => {
-      doc?.update((root) => {
-        root.indices = indices;
-      });
-    },
-    initializeRemoteDocument: async (
-      doc?: yorkie.Document<DottingDoc>,
-      client?: yorkie.Client<Indexable>,
-    ) => {
-      if (!doc || !client) return;
-
-      /* 01. create client with RPCAddr(envoy) then activate it. */
-      await client.activate();
-      /* 02. attach the document into the client. */
-      await client.attach(doc);
-      /* 03. create default fields if not exists. */
-      doc.update((root) => {
-        if (!root.strokedPixels && ref?.current) {
-          root.strokedPixels = strokedPixels;
-        }
-        if (!root.data && dottingData) {
-          root.data = convertDottingDataToYorkieData(dottingData);
-        }
-        if (!root.indices) {
-          root.indices = initialIndices;
-          setInitDottingArray(convertYorkieDataToDottingArray(doc));
-        }
-      }, 'Initialize default Dotting Document fields if not exists');
-    },
-  };
-
-  /* HANDLERS for change events */
-  const handlers = {
-    handleStrokeEnd: ({ strokedPixels }: { strokedPixels: Array<ColorChangeItem> }) => {
-      setStrokedPixels(strokedPixels);
-      actions.updateStrokedPixels(strokedPixels);
-    },
-    handleGridChange: ({ indices }: { indices: Indices }) => {
-      actions.updateGrid(indices);
-    },
-  };
-
-  /* EFFECTS */
-  useEffect(() => {
-    setLocalData(dottingData);
-  }, [dottingData]);
-
-  useEffect(() => {
-    actions
-      .initializeRemoteDocument(doc, client)
-      .then((res) => {
-        setLoading(false);
-      })
-      .catch((e) => {
-        setLoading(false);
-      });
-  }, [doc, client, ref, localData]);
-
-  useEffect(() => {
-    addStrokeEndListener(handlers.handleStrokeEnd);
-    return () => {
-      removeStrokeEndListener(handlers.handleStrokeEnd);
-    };
-  }, [addStrokeEndListener, removeStrokeEndListener]);
-
-  useEffect(() => {
-    addGridChangeListener(handlers.handleGridChange);
-    return () => {
-      removeGridChangeListener(handlers.handleGridChange);
-    };
-  }, [addGridChangeListener, removeGridChangeListener]);
-
-  /* SUBSCRIBE (Update local & Dotting states) */
-  useEffect(() => {
-    doc?.subscribe((event) => {
-      const strokedPixels = doc.getRoot().strokedPixels;
-      if (strokedPixels) {
-        strokedPixels?.map((item) => {
+        strokedPixels?.forEach((item) => {
           const { color, rowIndex, columnIndex } = item;
-          return {
-            color,
-            rowIndex,
-            columnIndex,
-          };
+          root.data[rowIndex][columnIndex].color = color;
         });
-        colorPixels(strokedPixels);
-      }
+      });
+    };
+    addStrokeEndListener(updateData);
+    return () => {
+      removeStrokeEndListener(updateData);
+    };
+  }, [addStrokeEndListener, removeStrokeEndListener, doc]);
+
+  const activateClient = async () => {
+    const client = new yorkie.Client(import.meta.env.VITE_YORKIE_API_ADDR, {
+      apiKey: import.meta.env.VITE_YORKIE_API_KEY,
     });
-  }, [doc, strokedPixels]);
+    await client.activate();
+    return client;
+  };
 
-  /* RENDER */
-  if (!docId) {
-    return <div>docId is required</div>;
-  }
-  if (!client || !doc) {
-    return <div>loading...</div>;
-  }
+  const createDocument = () => {
+    return new yorkie.Document<DottingDoc>(docId);
+  };
+  //
+  const attachDocument = async () => {
+    await client.attach(doc);
+  };
+  //
+  // // isDataLoaded
+  //
+  const initializeRemoteData = () => {
+    doc?.update((root) => {
+      console.log(dataArray, 'dataArray');
 
-  // TODO: Loading
+      if (!root.data) {
+        root.data = {};
+        dataArray.forEach((row) => {
+          row.forEach(({ rowIndex, columnIndex, color }) => {
+            if (!root.data[rowIndex]) {
+              root.data[rowIndex] = {};
+            }
+            if (!root.data[rowIndex][columnIndex]) {
+              // @ts-ignore
+              root.data[rowIndex][columnIndex] = {};
+            }
+            root.data[rowIndex][columnIndex].rowIndex = rowIndex;
+            root.data[rowIndex][columnIndex].columnIndex = columnIndex;
+            root.data[rowIndex][columnIndex].color = color;
+          });
+        });
+      } else {
+        const pixelArray: Array<Array<PixelModifyItem>> = [];
+        const rawRecord: Record<string, Record<string, PixelModifyItem>> = JSON.parse(
+          // @ts-ignore
+          root.data.toJSON(),
+        );
+        Object.values(rawRecord).forEach((record) => {
+          pixelArray.push([]);
+          Object.values(record).forEach((item) => {
+            pixelArray[pixelArray.length - 1].push(item);
+          });
+        });
+        setData(pixelArray);
+      }
+      if (!root.indices) {
+        root.indices = initialIndices;
+      }
+    }, 'Initialize default Dotting Document fields if not exists');
+    client.sync();
+    setIsMultiplayerReady(true);
+  };
+
+  useEffect(() => {
+    if (!isMultiplayerReady) {
+      return;
+    }
+    console.log('isMultiplayerReady', isMultiplayerReady);
+    doc.subscribe((event: DocEvent) => {
+      if (event.type === 'remote-change') {
+        const { message, operations } = event.value;
+        const pixelsToColor: Array<PixelModifyItem> = [];
+        for (const op of operations) {
+          const { path } = op;
+          const parsedPath = path.split('.');
+          const columnIndex = parsedPath[parsedPath.length - 1];
+          const rowIndex = parsedPath[parsedPath.length - 2];
+          const color = doc.getRoot().data[rowIndex][columnIndex].color;
+          pixelsToColor.push({
+            rowIndex: Number(rowIndex),
+            columnIndex: Number(columnIndex),
+            color,
+          });
+
+          console.log(rowIndex, columnIndex, color);
+        }
+        colorPixels(pixelsToColor);
+      }
+      const target = doc.getValueByPath('$.data') as JSONArray<PixelModifyItem>;
+
+      console.log(target, 'target');
+    });
+    // const unsubscribeData = doc.subscribe('$.data', (event) => {
+    //   const target = doc.getValueByPath('$.data');
+    //   console.log(target, 'target');
+    // });
+    return () => {
+      // unsubscribe();
+    };
+  }, [isMultiplayerReady, client, doc]);
+
+  useEffect(() => {
+    activateClient().then((client) => {
+      console.log('activated client');
+      setClient(client);
+    });
+  }, [docId]);
+
+  useEffect(() => {
+    if (!client) return;
+    console.log('creating document!');
+    const doc = createDocument();
+    setDoc(doc);
+  }, [client]);
+
+  useEffect(() => {
+    if (!client || !doc) return;
+    console.log('doc and client initialized!');
+    if (!isDataLoaded) {
+      return;
+    }
+    console.log('data is loaded!@');
+    attachDocument().then(() => {
+      initializeRemoteData();
+      console.log('attach document successful!');
+    });
+  }, [client, doc, isDataLoaded]);
+
+  // // TODO: Loading
 
   return (
     <>
@@ -180,7 +180,7 @@ export default function Document() {
         width={'100%'}
         height={'800px'}
         style={{ border: 'none' }}
-        initData={initDottingArray}
+        initData={initialDataArray}
       />
     </>
   );

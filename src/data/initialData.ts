@@ -14,7 +14,7 @@ export const initialDataArray = Array(30)
 
 export const initialIndices = {
   topRowIndex: 0,
-  bottomRowIndex: 30,
+  bottomRowIndex: 29,
   leftColumnIndex: 0,
-  rightColumnIndex: 30,
+  rightColumnIndex: 29,
 };

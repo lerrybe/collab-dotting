@@ -1,9 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DocEvent } from 'yorkie-js-sdk';
 import { Dotting, useData, useDotting, useHandlers, DottingRef, PixelModifyItem } from 'dotting';
 
 import usePeer from '../hooks/usePeer.js';
+import { useDottingContext } from '../context/DottingContext.tsx';
+
+import Menu from '../components/Menu.tsx';
+import PaintTools from '../components/PaintTools.js';
+import ControlTools from '../components/ControlTools.js';
 import { initialDataArray } from '../data/initialData.js';
 
 export default function Document() {
@@ -17,6 +22,7 @@ export default function Document() {
   const { addStrokeEndListener, removeStrokeEndListener } = useHandlers(ref);
 
   /* Get data from hook */
+  const { isGridFixed, isGridVisible, isPanZoomEnable } = useDottingContext();
   const { doc, client, isMultiplayerReady } = usePeer({ docId, dataArray, setData });
 
   useEffect(() => {
@@ -59,14 +65,22 @@ export default function Document() {
   }, [doc, client, isMultiplayerReady]);
 
   return (
-    <>
+    <main className='relative'>
       <Dotting
         ref={ref}
-        width={'100%'}
-        height={'800px'}
+        width={'100vw'}
+        height={'100vh'}
         style={{ border: 'none' }}
+        isGridFixed={isGridFixed}
+        isGridVisible={isGridVisible}
+        isPanZoomable={isPanZoomEnable}
         initData={initialDataArray}
       />
-    </>
+      <div className='flex flex-col gap-2 absolute top-1 left-1'>
+        <Menu ref={ref} />
+        <PaintTools ref={ref} />
+        <ControlTools ref={ref} />
+      </div>
+    </main>
   );
 }

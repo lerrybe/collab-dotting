@@ -2,10 +2,9 @@ import React, { ForwardedRef, forwardRef } from 'react';
 import { DottingRef, useDotting } from 'dotting';
 import LogoImage from '../assets/logo.svg';
 
-import { BiDownload } from 'react-icons/bi';
 import { RxHamburgerMenu } from 'react-icons/rx';
+import { BiDownload, BiShareAlt } from 'react-icons/bi';
 import AdditionalControlsDropdown from './AdditionalControlsDropdown.tsx';
-import Tool from './Tool.tsx';
 
 const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore
@@ -17,7 +16,7 @@ const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>)
 
   return (
     <div className='flex items-center p-1 gap-0.5 w-auto h-auto bg-light-gray rounded-lg shadow-lg'>
-      <img src={LogoImage} alt='logo' className='w-10 h-10 mr-2' />
+      <img src={LogoImage} alt='logo' className='w-10 h-10' />
       <button
         type='button'
         id='additionalControls'
@@ -36,6 +35,16 @@ const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>)
         className={`${TRANSITION_CLASS} ${DEFAULT_COLOR_CLASS} ${TEMPLATE_CLASS}`}
       >
         <BiDownload />
+      </button>
+
+      <button
+        type='button'
+        onClick={() => {
+          alert('링크를 공유합니다.');
+        }}
+        className={`${TRANSITION_CLASS} ${DEFAULT_COLOR_CLASS} ${TEMPLATE_CLASS}`}
+      >
+        <BiShareAlt />
       </button>
     </div>
   );

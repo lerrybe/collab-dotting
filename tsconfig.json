@@ -4,10 +4,10 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "module": "ESNext",
     "allowJs": true,
-//    "skipLibCheck": true,
+    "skipLibCheck": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "moduleResolution": "nodenext",
+    "moduleResolution": "node",
 
     /* Bundler mode */
     "allowImportingTsExtensions": true,

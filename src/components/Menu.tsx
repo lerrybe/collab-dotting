@@ -1,6 +1,5 @@
 import React, { ForwardedRef, forwardRef } from 'react';
 import { DottingRef, useDotting } from 'dotting';
-import LogoImage from '../assets/logo.svg';
 
 import { RxHamburgerMenu } from 'react-icons/rx';
 import { BiDownload, BiShareAlt } from 'react-icons/bi';
@@ -16,7 +15,6 @@ const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>)
 
   return (
     <div className='flex items-center p-1 gap-0.5 w-auto h-auto bg-light-gray rounded-lg shadow-lg'>
-      <img src={LogoImage} alt='logo' className='w-10 h-10' />
       <button
         type='button'
         id='additionalControls'

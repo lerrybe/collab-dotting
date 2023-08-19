@@ -11,6 +11,8 @@ import PaintTools from '../components/PaintTools.js';
 import ControlTools from '../components/ControlTools.js';
 import { initialDataArray } from '../data/initialData.js';
 
+import LogoImage from '../assets/logo.svg';
+
 export default function Document() {
   /* Document Id */
   const { docId } = useParams<{ docId: string }>();
@@ -76,10 +78,15 @@ export default function Document() {
         isPanZoomable={isPanZoomEnable}
         initData={initialDataArray}
       />
+
       <div className='flex flex-col gap-2 absolute top-1 left-1'>
         <Menu ref={ref} />
         <PaintTools ref={ref} />
         <ControlTools ref={ref} />
+      </div>
+
+      <div className='absolute bottom-2 right-2 w-20 h-20 rounded-[300px] bg-white shadow-2xl'>
+        <img src={LogoImage} alt='logo' className='w-full h-full' />
       </div>
     </main>
   );

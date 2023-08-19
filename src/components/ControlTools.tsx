@@ -34,24 +34,29 @@ const ControlTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<Dott
     <div className={`${TOOL_TEMPLATE_CLASS} ${TOOL_GIRD_CLASS}`}>
       <Tool
         handleClick={() => {
-          console.log('Add image to pixelate');
+          alert('Add image to pixelate');
         }}
       >
         <MdOutlineAddPhotoAlternate color={'#000'} size={18} />
       </Tool>
-      <Tool handleClick={clear}>
+      <Tool
+        handleClick={() => {
+          clear();
+          alert('Apply clear data to remote yorkie document');
+        }}
+      >
         <FaRegTrashAlt color={'#000'} size={14} />
       </Tool>
       <Tool
         handleClick={() => {
-          console.log('global undo');
+          alert('global undo');
         }}
       >
         <BiUndo color={'#000'} size={20} />
       </Tool>
       <Tool
         handleClick={() => {
-          console.log('global redo');
+          alert('global redo');
         }}
       >
         <BiRedo color={'#000'} size={20} />

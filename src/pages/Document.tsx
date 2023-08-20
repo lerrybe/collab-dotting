@@ -6,12 +6,12 @@ import { Dotting, useData, useDotting, useHandlers, DottingRef, PixelModifyItem 
 import usePeer from '../hooks/usePeer.js';
 import { useDottingContext } from '../context/DottingContext.tsx';
 
+import LogoImage from '../assets/logo.svg';
 import Menu from '../components/Menu.tsx';
+import Palette from '../components/Palette.tsx';
 import PaintTools from '../components/PaintTools.js';
 import ControlTools from '../components/ControlTools.js';
 import { initialDataArray } from '../data/initialData.js';
-
-import LogoImage from '../assets/logo.svg';
 
 export default function Document() {
   /* Document Id */
@@ -81,6 +81,7 @@ export default function Document() {
 
       <div className='flex flex-col gap-2 absolute top-1 left-1'>
         <Menu ref={ref} />
+        <Palette ref={ref} />
         <PaintTools ref={ref} />
         <ControlTools ref={ref} />
       </div>

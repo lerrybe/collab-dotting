@@ -11,25 +11,6 @@ const ControlTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<Dott
   // @ts-ignore
   const { undo, redo, clear } = useDotting(ref);
 
-  useEffect(() => {
-    const keyboardUndoListener = (e: KeyboardEvent) => {
-      if (e.code === 'KeyZ' && (e.ctrlKey || e.metaKey)) {
-        undo();
-      }
-    };
-    const keyboardRedoListener = (e: KeyboardEvent) => {
-      if (e.code === 'KeyR' && (e.ctrlKey || e.metaKey)) {
-        redo();
-      }
-    };
-    document.addEventListener('keydown', keyboardUndoListener);
-    document.addEventListener('keydown', keyboardRedoListener);
-    return () => {
-      document.removeEventListener('keydown', keyboardUndoListener);
-      document.removeEventListener('keydown', keyboardRedoListener);
-    };
-  }, []);
-
   return (
     <div className={`${TOOL_TEMPLATE_CLASS} ${TOOL_GIRD_CLASS}`}>
       <Tool

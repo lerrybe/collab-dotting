@@ -11,7 +11,6 @@ import Menu from '../components/Menu';
 import Palette from '../components/Palette';
 import PaintTools from '../components/PaintTools';
 import ControlTools from '../components/ControlTools';
-import { initialDataArray } from '../data/initialData';
 
 export default function Document() {
   /* Document Id */
@@ -76,7 +75,6 @@ export default function Document() {
         isGridFixed={isGridFixed}
         isGridVisible={isGridVisible}
         isPanZoomable={isPanZoomEnable}
-        initData={initialDataArray}
       />
 
       <div className='flex flex-col gap-2 absolute top-1 left-1'>

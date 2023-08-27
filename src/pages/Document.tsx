@@ -3,15 +3,15 @@ import { useParams } from 'react-router-dom';
 import { DocEvent } from 'yorkie-js-sdk';
 import { Dotting, useData, useDotting, useHandlers, DottingRef, PixelModifyItem } from 'dotting';
 
-import usePeer from '../hooks/usePeer.js';
-import { useDottingContext } from '../context/DottingContext.tsx';
+import usePeer from '../hooks/usePeer';
+import { useDottingContext } from '../context/DottingContext';
 
 import LogoImage from '../assets/logo.svg';
-import Menu from '../components/Menu.tsx';
-import Palette from '../components/Palette.tsx';
-import PaintTools from '../components/PaintTools.js';
-import ControlTools from '../components/ControlTools.js';
-import { initialDataArray } from '../data/initialData.js';
+import Menu from '../components/Menu';
+import Palette from '../components/Palette';
+import PaintTools from '../components/PaintTools';
+import ControlTools from '../components/ControlTools';
+import { initialDataArray } from '../data/initialData';
 
 export default function Document() {
   /* Document Id */

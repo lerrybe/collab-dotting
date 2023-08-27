@@ -3,7 +3,7 @@ import { DottingRef, useDotting } from 'dotting';
 
 import { RxHamburgerMenu } from 'react-icons/rx';
 import { BiDownload, BiShareAlt } from 'react-icons/bi';
-import AdditionalControlsDropdown from './AdditionalControlsDropdown.tsx';
+import AdditionalControlsDropdown from './AdditionalControlsDropdown';
 
 const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore

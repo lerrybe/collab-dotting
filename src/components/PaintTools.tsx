@@ -1,11 +1,11 @@
 import React, { ForwardedRef, forwardRef } from 'react';
 import { BrushTool, DottingRef, useBrush } from 'dotting';
 
-import Tool from './Tool.js';
+import Tool from './Tool';
 import { BiSolidSquare } from 'react-icons/bi';
 import { PiSelectionPlusBold } from 'react-icons/pi';
 import { LuEraser, LuPaintBucket } from 'react-icons/lu';
-import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass.js';
+import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass';
 
 const PaintTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore

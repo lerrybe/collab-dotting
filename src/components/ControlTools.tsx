@@ -1,11 +1,11 @@
-import React, { ForwardedRef, forwardRef, useEffect } from 'react';
+import React, { ForwardedRef, forwardRef } from 'react';
 import { DottingRef, useDotting } from 'dotting';
 
-import Tool from './Tool.js';
+import Tool from './Tool';
 import { FaRegTrashAlt } from 'react-icons/fa';
 import { BiRedo, BiUndo } from 'react-icons/bi';
 import { MdOutlineAddPhotoAlternate } from 'react-icons/md';
-import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass.js';
+import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass';
 
 const ControlTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore

@@ -1,7 +1,7 @@
 import React, { ForwardedRef, forwardRef, useCallback, useState } from 'react';
 import { DottingRef, useBrush } from 'dotting';
 
-import { TOOL_TEMPLATE_CLASS } from '../styles/styleClass.js';
+import { TOOL_TEMPLATE_CLASS } from '../styles/styleClass';
 
 const Palette = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore

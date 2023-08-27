@@ -1,5 +1,5 @@
-import Toggle from './Toggle.tsx';
-import { useDottingContext } from '../context/DottingContext.tsx';
+import Toggle from './Toggle';
+import { useDottingContext } from '../context/DottingContext';
 
 export default function AdditionalControlsDropdown() {
   const {

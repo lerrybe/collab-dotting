@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { PixelModifyItem } from 'dotting';
 import yorkie, { Document, Client } from 'yorkie-js-sdk';
 
-import { DottingDoc } from '../types/document.js';
-import { initialIndices } from '../data/initialData.js';
+import { DottingDoc } from '../types/document';
+import { initialIndices } from '../data/initialData';
 
 export default function usePeer({ docId, dataArray, setData }) {
   const [doc, setDoc] = useState<Document<DottingDoc>>();

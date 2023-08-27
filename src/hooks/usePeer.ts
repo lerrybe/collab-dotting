@@ -1,14 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { PixelModifyItem } from 'dotting';
-import yorkie, { Indexable } from 'yorkie-js-sdk';
+import yorkie, { Document, Client } from 'yorkie-js-sdk';
 
 import { DottingDoc } from '../types/document.js';
 import { initialIndices } from '../data/initialData.js';
 
 export default function usePeer({ docId, dataArray, setData }) {
-  const [doc, setDoc] = useState<yorkie.Document<DottingDoc>>();
-  const [client, setClient] = useState<yorkie.Client<Indexable>>();
+  const [doc, setDoc] = useState<Document<DottingDoc>>();
+  const [client, setClient] = useState<Client>();
   const [isMultiplayerReady, setIsMultiplayerReady] = useState<boolean>(false);
   const isDataLoaded = useMemo(() => {
     return dataArray.length !== 0;

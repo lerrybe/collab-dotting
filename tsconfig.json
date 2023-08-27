@@ -10,7 +10,6 @@
     "moduleResolution": "node",
 
     /* Bundler mode */
-    "allowImportingTsExtensions": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",

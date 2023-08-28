@@ -10,7 +10,7 @@ type DottingContextType = {
 };
 
 const DottingContext = createContext<DottingContextType | null>({
-  isGridFixed: false,
+  isGridFixed: true,
   isGridVisible: true,
   isPanZoomEnable: true,
   setIsGridFixed: (isGridFixed: boolean) => {},
@@ -19,7 +19,7 @@ const DottingContext = createContext<DottingContextType | null>({
 });
 
 function DottingProvider({ children }: { children: React.ReactNode }) {
-  const [isGridFixed, setIsGridFixed] = React.useState(false);
+  const [isGridFixed, setIsGridFixed] = React.useState(true);
   const [isGridVisible, setIsGridVisible] = React.useState(true);
   const [isPanZoomEnable, setIsPanZoomEnable] = React.useState(true);
 

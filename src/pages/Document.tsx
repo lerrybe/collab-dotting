@@ -16,7 +16,7 @@ import Menu from '../components/Menu';
 import Palette from '../components/Palette';
 import PaintTools from '../components/PaintTools';
 import ControlTools from '../components/ControlTools';
-import { CreateInitialDataArray } from '../data/initialData';
+import { CreateInitialDataArray } from '../utils/data';
 import { useDottingContext } from '../context/DottingContext';
 import LogoImage from '../assets/logo.svg';
 
@@ -149,7 +149,7 @@ export default function Document() {
         initLayers={[
           {
             id: 'layer1',
-            data: CreateInitialDataArray(30),
+            data: CreateInitialDataArray(40),
           },
         ]}
       />

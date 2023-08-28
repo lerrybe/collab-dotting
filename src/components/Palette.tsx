@@ -11,11 +11,12 @@ const Palette = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRe
     changeBrushColor.bind(null, e.target.value)();
   }, []);
 
+  const COLOR_CLASS = 'w-10 h-10';
   const DISPLAY_CLASS = 'flex justify-center items-center';
 
   return (
     <div className={`${TOOL_TEMPLATE_CLASS} ${DISPLAY_CLASS}`}>
-      <div className='w-10 h-10'>
+      <div className={COLOR_CLASS}>
         <input type='color' value={brushColor} onChange={handleColorChange} className='color' />
       </div>
     </div>

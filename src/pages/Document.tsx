@@ -20,6 +20,7 @@ import ControlTools from '../components/ControlTools';
 import { CreateInitialDataArray } from '../utils/data';
 import { useDottingContext } from '../context/DottingContext';
 import { useDocumentContext } from '../context/DocumentContext';
+import { CONTROLLER_CLASS, LOGO_CLASS, MAIN_CLASS } from '../styles/styleClass';
 
 import LogoImage from '../assets/logo.svg';
 
@@ -169,7 +170,7 @@ export default function Document() {
   }, [client, doc]);
 
   return (
-    <main className='relative'>
+    <main className={MAIN_CLASS}>
       <Dotting
         ref={ref}
         width={'100vw'}
@@ -185,18 +186,17 @@ export default function Document() {
           },
         ]}
       />
-      <div className='flex flex-col gap-2 absolute top-1 left-1'>
+
+      <div className={CONTROLLER_CLASS}>
         <Menu ref={ref} />
         <Palette ref={ref} />
         <PaintTools ref={ref} />
         <ControlTools ref={ref} undo={undoData} redo={redoData} clear={clearData} />
       </div>
 
-      <div className='absolute top-1 right-1'>
-        <Peers user={currentClient} peers={peersExceptCurrentClient} />
-      </div>
+      <Peers user={currentClient} peers={peersExceptCurrentClient} />
 
-      <div className='absolute bottom-2 right-2 w-20 h-20 rounded-[300px] bg-white shadow-2xl'>
+      <div className={LOGO_CLASS}>
         <img src={LogoImage} alt='logo' className='w-full h-full' />
       </div>
     </main>

@@ -10,9 +10,11 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "anonymous-animals-gen": "^1.0.3",
     "dotting": "^2.0.1",
     "flowbite": "^1.8.1",
     "flowbite-react": "^0.5.0",
+    "randomcolor": "^0.6.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-icons": "^4.10.1",

@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-
-import { PixelModifyItem } from 'dotting';
 import yorkie, { Document, Client } from 'yorkie-js-sdk';
+import anonymous from 'anonymous-animals-gen';
+import { PixelModifyItem } from 'dotting';
+import randomColor from 'randomcolor';
 
 import { DottingDoc } from '../types/document';
 
@@ -26,7 +27,22 @@ export default function usePeer({ docId, dataArray, setData }) {
   };
 
   const attachDocument = async (client, doc) => {
-    await client.attach(doc);
+    const clientColor = randomColor();
+    const { name } = anonymous.generate();
+
+    const initialPresence = {
+      username: name,
+      color: clientColor,
+    };
+
+    await client.attach(doc, {
+      initialPresence,
+      isRealtimeSync: true,
+    });
+
+    doc.update((root, presence) => {
+      presence.set({ initialPresence });
+    });
   };
 
   const initializeRemoteData = (dataArray, setData) => {

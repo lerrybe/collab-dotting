@@ -1,20 +1,13 @@
-export const initialDataArray = Array(30)
-  .fill('')
-  .map((_, rowIndex) => {
-    return Array(30)
-      .fill('')
-      .map((_, columnIndex) => {
-        return {
-          color: '',
-          rowIndex,
-          columnIndex,
-        };
-      });
-  });
+import { PixelModifyItem } from 'dotting';
 
-export const initialIndices = {
-  topRowIndex: 0,
-  bottomRowIndex: 29,
-  leftColumnIndex: 0,
-  rightColumnIndex: 29,
+export const CreateInitialDataArray = (size: number): PixelModifyItem[][] => {
+  const data: PixelModifyItem[][] = [];
+  for (let i = 0; i < size; i++) {
+    const row: PixelModifyItem[] = [];
+    for (let j = 0; j < size; j++) {
+      row.push({ rowIndex: i, columnIndex: j, color: '' });
+    }
+    data.push(row);
+  }
+  return data;
 };

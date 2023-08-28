@@ -4,7 +4,6 @@ import { PixelModifyItem } from 'dotting';
 import yorkie, { Document, Client } from 'yorkie-js-sdk';
 
 import { DottingDoc } from '../types/document';
-import { initialIndices } from '../data/initialData';
 
 export default function usePeer({ docId, dataArray, setData }) {
   const [doc, setDoc] = useState<Document<DottingDoc>>();
@@ -32,10 +31,6 @@ export default function usePeer({ docId, dataArray, setData }) {
 
   const initializeRemoteData = (dataArray, setData) => {
     doc?.update((root) => {
-      if (!root.indices) {
-        root.indices = initialIndices;
-      }
-
       if (!root.data) {
         root.data = {};
         dataArray.forEach((row) => {

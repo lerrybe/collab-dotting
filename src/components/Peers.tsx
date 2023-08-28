@@ -20,10 +20,7 @@ export default function Peers({ user, peers }: PeersProps) {
   const currentClientName = useMemo(() => {
     return user?.presence?.initialPresence?.username;
   }, [user]);
-
   const [hoveredPeer, setHoveredPeer] = useState<string | null>(null);
-
-  console.log(hoveredPeer);
 
   return (
     <div className={PEERS_CONTAINER_CLASS}>

@@ -5,11 +5,12 @@ import 'flowbite';
 import './styles/index.css';
 import App from './App';
 import DottingProvider from './context/DottingContext';
+import DocumentProvider from './context/DocumentContext';
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <DottingProvider>
+  <DottingProvider>
+    <DocumentProvider>
       <App />
-    </DottingProvider>
-  </React.StrictMode>,
+    </DocumentProvider>
+  </DottingProvider>,
 );

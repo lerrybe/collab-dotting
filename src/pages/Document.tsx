@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { DocEvent } from 'yorkie-js-sdk';
 import {
@@ -18,7 +18,10 @@ import PaintTools from '../components/PaintTools';
 import ControlTools from '../components/ControlTools';
 import { CreateInitialDataArray } from '../utils/data';
 import { useDottingContext } from '../context/DottingContext';
+import { useDocumentContext } from '../context/DocumentContext';
+
 import LogoImage from '../assets/logo.svg';
+import Peers from '../components/Peers';
 
 export default function Document() {
   /* Document Id */
@@ -35,8 +38,11 @@ export default function Document() {
   const { doc, client, isMultiplayerReady } = usePeer({ docId, dataArray, setData });
 
   /* Manage History */
-  const [undoHistory, setUndoHistory] = React.useState<ColorChangeItem[][]>([]);
-  const [redoHistory, setRedoHistory] = React.useState<ColorChangeItem[][]>([]);
+  const [undoHistory, setUndoHistory] = useState<ColorChangeItem[][]>([]);
+  const [redoHistory, setRedoHistory] = useState<ColorChangeItem[][]>([]);
+
+  /* Manage Peer */
+  const { currentClient, peersExceptCurrentClient, syncPeers } = useDocumentContext();
 
   /* Undo */
   const undoData = useCallback(() => {
@@ -136,6 +142,29 @@ export default function Document() {
     });
   }, [doc, client, isMultiplayerReady]);
 
+  /* Unsubscribe from yorkie remote */
+  useEffect(() => {
+    if (!client || !doc) {
+      return () => {};
+    }
+    const subscribe = doc.subscribe('others', (event) => {
+      if (event.type === 'initialized') {
+        const users = doc?.getPresences();
+        if (users) {
+          syncPeers({ myClientID: client.getID(), changedPeers: users });
+        }
+      } else if (event.type === 'presence-changed') {
+        const users = doc.getPresences();
+        if (users) {
+          syncPeers({ myClientID: client.getID(), changedPeers: users });
+        }
+      }
+    });
+    return () => {
+      subscribe();
+    };
+  }, [client, doc]);
+
   return (
     <main className='relative'>
       <Dotting
@@ -159,6 +188,11 @@ export default function Document() {
         <PaintTools ref={ref} />
         <ControlTools ref={ref} undo={undoData} redo={redoData} clear={clearData} />
       </div>
+
+      <div className='absolute top-1 right-1'>
+        <Peers user={currentClient} peers={peersExceptCurrentClient} />
+      </div>
+
       <div className='absolute bottom-2 right-2 w-20 h-20 rounded-[300px] bg-white shadow-2xl'>
         <img src={LogoImage} alt='logo' className='w-full h-full' />
       </div>

@@ -13,6 +13,7 @@ import {
 
 import usePeer from '../hooks/usePeer';
 import Menu from '../components/Menu';
+import Peers from '../components/Peers';
 import Palette from '../components/Palette';
 import PaintTools from '../components/PaintTools';
 import ControlTools from '../components/ControlTools';
@@ -21,7 +22,6 @@ import { useDottingContext } from '../context/DottingContext';
 import { useDocumentContext } from '../context/DocumentContext';
 
 import LogoImage from '../assets/logo.svg';
-import Peers from '../components/Peers';
 
 export default function Document() {
   /* Document Id */
@@ -47,9 +47,7 @@ export default function Document() {
   /* Undo */
   const undoData = useCallback(() => {
     if (!undoHistory) return;
-
     undo();
-
     doc?.update((root) => {
       const history = undoHistory.pop();
       if (!history) return;
@@ -65,13 +63,10 @@ export default function Document() {
   /* Redo */
   const redoData = useCallback(() => {
     if (!redoHistory) return;
-
     redo();
-
     doc?.update((root) => {
       const history = redoHistory.pop();
       if (!history) return;
-
       setUndoHistory([...undoHistory.map((items) => [...items]), history]);
       history?.forEach((item) => {
         const { color, rowIndex, columnIndex, previousColor } = item;
@@ -83,12 +78,10 @@ export default function Document() {
   /* Clear */
   const clearData = useCallback(() => {
     if (!confirm('Are you sure you want to clear the canvas and all history?')) return;
-
     clear();
     doc?.update((root) => {
       setUndoHistory([]);
       setRedoHistory([]);
-
       dataArray?.forEach((row) => {
         row.forEach(({ rowIndex, columnIndex }) => {
           root.data[rowIndex][columnIndex].color = '';
@@ -101,7 +94,6 @@ export default function Document() {
   useEffect(() => {
     const updateData = ({ strokedPixels }) => {
       setUndoHistory([...undoHistory.map((items) => [...items]), strokedPixels]);
-
       doc?.update((root) => {
         strokedPixels?.forEach((item) => {
           const { color, rowIndex, columnIndex } = item;
@@ -115,11 +107,11 @@ export default function Document() {
     };
   }, [doc, addStrokeEndListener, removeStrokeEndListener, dataArray]);
 
-  /* Subscribe from yorkie remote */
+  /* Subscribe from yorkie remote (document data) */
   useEffect(() => {
     if (!isMultiplayerReady) return;
 
-    doc.subscribe((event: DocEvent) => {
+    const subscribe = doc.subscribe((event: DocEvent) => {
       if (event.type === 'remote-change') {
         const { message, operations } = event.value;
         const pixelsToColor: PixelModifyItem[] = [];
@@ -140,24 +132,35 @@ export default function Document() {
         colorPixels(pixelsToColor);
       }
     });
+
+    return () => {
+      subscribe();
+    };
   }, [doc, client, isMultiplayerReady]);
 
-  /* Unsubscribe from yorkie remote */
+  /* Subscribe from yorkie remote (peer info) */
   useEffect(() => {
     if (!client || !doc) {
       return () => {};
     }
-    const subscribe = doc.subscribe('others', (event) => {
+    const updatePeers = () => {
+      const users = doc?.getPresences();
+      if (users) {
+        syncPeers({ myClientID: client.getID(), changedPeers: users });
+      }
+    };
+    const subscribe = doc.subscribe('presence', (event) => {
       if (event.type === 'initialized') {
-        const users = doc?.getPresences();
-        if (users) {
-          syncPeers({ myClientID: client.getID(), changedPeers: users });
-        }
-      } else if (event.type === 'presence-changed') {
-        const users = doc.getPresences();
-        if (users) {
-          syncPeers({ myClientID: client.getID(), changedPeers: users });
-        }
+        updatePeers();
+      }
+      if (event.type === 'watched') {
+        updatePeers();
+      }
+      if (event.type === 'unwatched') {
+        updatePeers();
+      }
+      if (event.type === 'presence-changed') {
+        updatePeers();
       }
     });
     return () => {

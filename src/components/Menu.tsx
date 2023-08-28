@@ -1,5 +1,9 @@
 import React, { ForwardedRef, forwardRef } from 'react';
+import { useParams } from 'react-router-dom';
 import { DottingRef, useDotting } from 'dotting';
+
+import { BASE_URL } from '../constant/urls';
+import { handleCopyLink } from '../utils/clipboard';
 
 import { RxHamburgerMenu } from 'react-icons/rx';
 import { BiDownload, BiShareAlt } from 'react-icons/bi';
@@ -8,6 +12,7 @@ import AdditionalControlsDropdown from './AdditionalControlsDropdown';
 const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
   // @ts-ignore
   const { downloadImage } = useDotting(ref);
+  const { docId } = useParams();
 
   const CONTAINER_CLASS =
     'flex items-center p-1 gap-0.5 w-auto h-auto bg-light-gray rounded-lg shadow-lg';
@@ -40,7 +45,9 @@ const Menu = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>)
       <button
         type='button'
         onClick={() => {
-          alert('링크를 공유합니다.');
+          handleCopyLink(`${BASE_URL}/${docId}`).then(() => {
+            alert('현재 작업 링크가 복사되었습니다.');
+          });
         }}
         className={`${TRANSITION_CLASS} ${DEFAULT_COLOR_CLASS} ${TEMPLATE_CLASS}`}
       >

@@ -13,9 +13,11 @@ const ControlTools = forwardRef(function InnerToolbar(
 ) {
   return (
     <div className={`${TOOL_TEMPLATE_CLASS} ${TOOL_GIRD_CLASS}`}>
+      {/* TODO: add image to pixelate */}
       <Tool
+        disabled
         handleClick={() => {
-          alert('Add image to pixelate');
+          return;
         }}
       >
         <MdOutlineAddPhotoAlternate color={'#000'} size={18} />

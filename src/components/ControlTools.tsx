@@ -1,5 +1,5 @@
 import React, { ForwardedRef, forwardRef } from 'react';
-import { DottingRef, useDotting } from 'dotting';
+import { DottingRef } from 'dotting';
 
 import Tool from './Tool';
 import { FaRegTrashAlt } from 'react-icons/fa';
@@ -7,10 +7,10 @@ import { BiRedo, BiUndo } from 'react-icons/bi';
 import { MdOutlineAddPhotoAlternate } from 'react-icons/md';
 import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass';
 
-const ControlTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<DottingRef>) {
-  // @ts-ignore
-  const { undo, redo, clear } = useDotting(ref);
-
+const ControlTools = forwardRef(function InnerToolbar(
+  { undo, redo, clear }: { undo: () => void; redo: () => void; clear: () => void },
+  ref: ForwardedRef<DottingRef>,
+) {
   return (
     <div className={`${TOOL_TEMPLATE_CLASS} ${TOOL_GIRD_CLASS}`}>
       <Tool
@@ -20,26 +20,13 @@ const ControlTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<Dott
       >
         <MdOutlineAddPhotoAlternate color={'#000'} size={18} />
       </Tool>
-      <Tool
-        handleClick={() => {
-          clear();
-          alert('Apply clear data to remote yorkie document');
-        }}
-      >
+      <Tool handleClick={clear}>
         <FaRegTrashAlt color={'#000'} size={14} />
       </Tool>
-      <Tool
-        handleClick={() => {
-          alert('global undo');
-        }}
-      >
+      <Tool handleClick={undo}>
         <BiUndo color={'#000'} size={20} />
       </Tool>
-      <Tool
-        handleClick={() => {
-          alert('global redo');
-        }}
-      >
+      <Tool handleClick={redo}>
         <BiRedo color={'#000'} size={20} />
       </Tool>
     </div>

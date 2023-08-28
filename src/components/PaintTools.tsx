@@ -37,10 +37,12 @@ const PaintTools = forwardRef(function InnerToolbar({}, ref: ForwardedRef<Dottin
       >
         <LuPaintBucket color={brushTool === BrushTool.PAINT_BUCKET ? '#fff' : '#000'} />
       </Tool>
+      {/* TODO: Implement Select Mode */}
       <Tool
-        selected={brushTool === BrushTool.SELECT}
+        disabled
+        selected={false}
         handleClick={() => {
-          changeBrushTool(BrushTool.SELECT);
+          return;
         }}
       >
         <PiSelectionPlusBold color={brushTool === BrushTool.SELECT ? '#fff' : '#000'} />

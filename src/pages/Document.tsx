@@ -46,6 +46,7 @@ export default function Document() {
   const { currentClient, peersExceptCurrentClient, syncPeers } = useDocumentContext();
 
   /* Undo */
+  // TODO: Modify grid change-related matters
   const undoData = useCallback(() => {
     if (!undoHistory) return;
     undo();
@@ -62,6 +63,7 @@ export default function Document() {
   }, [dataArray]);
 
   /* Redo */
+  // TODO: Modify grid change-related matters
   const redoData = useCallback(() => {
     if (!redoHistory) return;
     redo();

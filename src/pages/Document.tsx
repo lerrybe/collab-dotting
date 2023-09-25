@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DocEvent } from 'yorkie-js-sdk';
 import {
+  CanvasDataChangeHandler,
   Dotting,
+  DottingRef,
+  PixelModifyItem,
   useData,
   useDotting,
   useHandlers,
-  DottingRef,
-  PixelModifyItem,
-  ColorChangeItem,
 } from 'dotting';
 
 import usePeer from '../hooks/usePeer';
@@ -29,62 +29,24 @@ export default function Document() {
   const { docId } = useParams<{ docId: string }>();
 
   /* Dotting */
+  // const [dataDelta, setDataDelta] = useState<CanvasDelta | null>(null);
   const ref = useRef<DottingRef>(null);
   const { dataArray } = useData(ref);
-  const { colorPixels, setData, undo, redo, clear } = useDotting(ref);
-  const { addStrokeEndListener, removeStrokeEndListener } = useHandlers(ref);
+  const { addDataChangeListener, removeDataChangeListener } = useHandlers(ref);
+  const { clear, setData, colorPixels, addGridIndices, deleteGridIndices } = useDotting(ref);
 
   /* Get data from hook */
   const { isGridFixed, isGridVisible, isPanZoomEnable } = useDottingContext();
   const { doc, client, isMultiplayerReady } = usePeer({ docId, dataArray, setData });
 
-  /* Manage History */
-  const [undoHistory, setUndoHistory] = useState<ColorChangeItem[][]>([]);
-  const [redoHistory, setRedoHistory] = useState<ColorChangeItem[][]>([]);
-
   /* Manage Peer */
   const { currentClient, peersExceptCurrentClient, syncPeers } = useDocumentContext();
 
-  /* Undo */
-  // TODO: Modify grid change-related matters
-  const undoData = useCallback(() => {
-    if (!undoHistory) return;
-    undo();
-    doc?.update((root) => {
-      const history = undoHistory.pop();
-      if (!history) return;
-
-      setRedoHistory([...redoHistory.map((items) => [...items]), history]);
-      history?.forEach((item) => {
-        const { color, rowIndex, columnIndex, previousColor } = item;
-        root.data[rowIndex][columnIndex].color = previousColor;
-      });
-    });
-  }, [dataArray]);
-
-  /* Redo */
-  // TODO: Modify grid change-related matters
-  const redoData = useCallback(() => {
-    if (!redoHistory) return;
-    redo();
-    doc?.update((root) => {
-      const history = redoHistory.pop();
-      if (!history) return;
-      setUndoHistory([...undoHistory.map((items) => [...items]), history]);
-      history?.forEach((item) => {
-        const { color, rowIndex, columnIndex, previousColor } = item;
-        root.data[rowIndex][columnIndex].color = color;
-      });
-    });
-  }, [dataArray]);
-
   /* Clear */
   const clearData = useCallback(() => {
-    if (!confirm('Are you sure you want to clear the canvas and all history?')) return;
+    if (!confirm('Are you sure you want to clear the canvas and all histories?')) return;
     clear();
     doc?.update((root) => {
-      setUndoHistory([]);
-      setRedoHistory([]);
       dataArray?.forEach((row) => {
         row.forEach(({ rowIndex, columnIndex }) => {
           root.data[rowIndex][columnIndex].color = '';
@@ -93,22 +55,104 @@ export default function Document() {
     });
   }, [dataArray]);
 
+  // if (doc) {
+  //   if (doc?.getRoot()) {
+  //     if (doc?.getRoot()?.data) {
+  //       // @ts-ignore
+  //       const target = JSON.parse(doc.getRoot().data.toJSON());
+  //       if (target.hasOwnProperty('0')) {
+  //         if (target['0'].hasOwnProperty('0')) {
+  //           console.log('진입은함');
+  //           delete doc?.getRoot()?.data['0'];
+  //         }
+  //       }
+  //     }
+  //   }
+  // }
+
   /* Update to yorkie remote */
   useEffect(() => {
-    const updateData = ({ strokedPixels }) => {
-      setUndoHistory([...undoHistory.map((items) => [...items]), strokedPixels]);
+    const handleDataChangeHandler: CanvasDataChangeHandler = ({ isLocalChange, delta, data }) => {
       doc?.update((root) => {
-        strokedPixels?.forEach((item) => {
-          const { color, rowIndex, columnIndex } = item;
-          root.data[rowIndex][columnIndex].color = color;
-        });
+        if (isLocalChange && delta?.modifiedPixels) {
+          delta?.modifiedPixels?.forEach((item) => {
+            const { color, rowIndex, columnIndex } = item;
+            root.data[rowIndex][columnIndex].color = color;
+          });
+        }
+      });
+
+      /* TODO: Update to yorkie remote */
+      doc?.update((root) => {
+        // todo: 변경 안된 부분만 체크하기 위한 range 인데 고민
+        // const range = {
+        //   minimum: { rowIndex: Number.POSITIVE_INFINITY, columnIndex: Number.POSITIVE_INFINITY },
+        //   maximum: { rowIndex: Number.NEGATIVE_INFINITY, columnIndex: Number.NEGATIVE_INFINITY },
+        // };
+        //
+        // const rawRecord: Record<string, Record<string, PixelModifyItem>> = JSON.parse(
+        //   // @ts-ignore
+        //   root.data.toJSON(),
+        // );
+
+        // Object.values(rawRecord).forEach((record) => {
+        //   Object.values(record).forEach((item) => {
+        //     range.minimum.rowIndex = Math.min(range.minimum.rowIndex, item.rowIndex);
+        //     range.maximum.rowIndex = Math.max(range.maximum.rowIndex, item.rowIndex);
+        //     range.minimum.columnIndex = Math.min(range.minimum.columnIndex, item.columnIndex);
+        //     range.maximum.columnIndex = Math.max(range.maximum.columnIndex, item.columnIndex);
+        //   });
+        // }
+
+        if (isLocalChange && (delta?.addedOrDeletedColumns || delta?.addedOrDeletedRows)) {
+          root.addedOrDeletedRows = delta.addedOrDeletedRows;
+          root.addedOrDeletedColumns = delta.addedOrDeletedColumns;
+        }
+
+        // todo: yorkie document에 대한 수정 부분
+        // 바뀐 배열들 보면서, 만약 추가된 row/column이 있다면, 그 row/column에 대한 데이터를 추가해준다.
+        // // 만약 삭제된 row/column이 있다면, 그 row/column에 대한 데이터를 삭제해준다.
+        // if (delta?.addedOrDeletedRows) {
+        //   delta.addedOrDeletedRows.forEach(({ index: rowIndex, isDelete }) => {
+        //     if (!isDelete) {
+        //       if (rowIndex < range.minimum.rowIndex || rowIndex > range.maximum.rowIndex) {
+        //         root.data[rowIndex] = {};
+        //         for (
+        //           let columnIndex = range.minimum.columnIndex;
+        //           columnIndex <= range.maximum.columnIndex;
+        //           columnIndex++
+        //         ) {
+        //           if (!root.data[rowIndex][columnIndex]) {
+        //             // @ts-ignore
+        //             root.data[rowIndex][columnIndex] = {};
+        //           }
+        //           root.data[rowIndex][columnIndex].color = '';
+        //           root.data[rowIndex][columnIndex].rowIndex = rowIndex;
+        //           root.data[rowIndex][columnIndex].columnIndex = columnIndex;
+        //         }
+        //       }
+        //     } else {
+        //       // delete인 경우
+        //     }
+        //   });
+        // }
+        // if (delta?.addedOrDeletedColumns) {
+        //   delta.addedOrDeletedColumns.forEach(({ index, isDelete }) => {
+        //     if (!isDelete) {
+        //       // add인 경우
+        //     } else {
+        //       // delete인 경우
+        //     }
+        //   });
+        // }
       });
     };
-    addStrokeEndListener(updateData);
+
+    addDataChangeListener(handleDataChangeHandler);
     return () => {
-      removeStrokeEndListener(updateData);
+      removeDataChangeListener(handleDataChangeHandler);
     };
-  }, [doc, addStrokeEndListener, removeStrokeEndListener, dataArray]);
+  }, [isMultiplayerReady, addDataChangeListener, removeDataChangeListener]);
 
   /* Subscribe from yorkie remote (document data) */
   useEffect(() => {
@@ -116,8 +160,10 @@ export default function Document() {
 
     const subscribe = doc.subscribe((event: DocEvent) => {
       if (event.type === 'remote-change') {
+        console.log('이벤트', event);
         const { message, operations } = event.value;
         const pixelsToColor: PixelModifyItem[] = [];
+        console.log('오펄이션들', operations);
         for (const op of operations) {
           const { path } = op;
           const parsedPath = path.split('.');
@@ -133,6 +179,48 @@ export default function Document() {
           });
         }
         colorPixels(pixelsToColor);
+
+        // TODO: subscribe to addedOrDeletedRows, addedOrDeletedColumns
+        // todo: 이렇게 따로 getRoot 하지 않고 event.value를 통해 diff를 가져오고 싶은데 operations에서 이게 삭제된 건지 추가된 건지 알 수 없는 것 같다
+        /* operations 프린트 한 값 예시
+          0: {type: 'set', path: '$', key: 'addedOrDeletedRows'}
+          1: {type: 'add', path: '$.addedOrDeletedRows', index: 0}
+          2: {type: 'set', path: '$.addedOrDeletedRows.0', key: 'index'}
+          3: {type: 'set', path: '$.addedOrDeletedRows.0', key: 'isDelete'}
+          4: {type: 'add', path: '$.addedOrDeletedRows', index: 1}
+          5: {type: 'set', path: '$.addedOrDeletedRows.1', key: 'index'}
+          6: {type: 'set', path: '$.addedOrDeletedRows.1', key: 'isDelete'}
+          7: {type: 'add', path: '$.addedOrDeletedRows', index: 2}
+          8: {type: 'set', path: '$.addedOrDeletedRows.2', key: 'index'}
+          9: {type: 'set', path: '$.addedOrDeletedRows.2', key: 'isDelete'}
+          10: {type: 'add', path: '$.addedOrDeletedRows', index: 3}
+         */
+        doc?.getRoot()?.addedOrDeletedRows?.forEach(({ index, isDelete }) => {
+          if (!isDelete) {
+            addGridIndices({
+              columnIndices: [],
+              rowIndices: [index],
+            });
+          } else {
+            deleteGridIndices({
+              columnIndices: [],
+              rowIndices: [index],
+            });
+          }
+        });
+        doc?.getRoot()?.addedOrDeletedColumns?.forEach(({ index, isDelete }) => {
+          if (!isDelete) {
+            addGridIndices({
+              columnIndices: [index],
+              rowIndices: [],
+            });
+          } else {
+            deleteGridIndices({
+              columnIndices: [index],
+              rowIndices: [],
+            });
+          }
+        });
       }
     });
 
@@ -193,7 +281,7 @@ export default function Document() {
         <Menu ref={ref} />
         <Palette ref={ref} />
         <PaintTools ref={ref} />
-        <ControlTools ref={ref} undo={undoData} redo={redoData} clear={clearData} />
+        <ControlTools ref={ref} clear={clearData} />
       </div>
 
       <Peers user={currentClient} peers={peersExceptCurrentClient} />

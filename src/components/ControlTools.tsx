@@ -1,5 +1,5 @@
-import React, { ForwardedRef, forwardRef } from 'react';
-import { DottingRef } from 'dotting';
+import React, { forwardRef, MutableRefObject } from 'react';
+import { DottingRef, useDotting } from 'dotting';
 
 import Tool from './Tool';
 import { FaRegTrashAlt } from 'react-icons/fa';
@@ -8,9 +8,11 @@ import { MdOutlineAddPhotoAlternate } from 'react-icons/md';
 import { TOOL_GIRD_CLASS, TOOL_TEMPLATE_CLASS } from '../styles/styleClass';
 
 const ControlTools = forwardRef(function InnerToolbar(
-  { undo, redo, clear }: { undo: () => void; redo: () => void; clear: () => void },
-  ref: ForwardedRef<DottingRef>,
+  { clear }: { clear: () => void },
+  ref: MutableRefObject<DottingRef>,
 ) {
+  const { undo, redo } = useDotting(ref);
+
   return (
     <div className={`${TOOL_TEMPLATE_CLASS} ${TOOL_GIRD_CLASS}`}>
       {/* TODO: add image to pixelate */}

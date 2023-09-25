@@ -104,9 +104,51 @@ export default function Document() {
         //   });
         // }
 
-        if (isLocalChange && (delta?.addedOrDeletedColumns || delta?.addedOrDeletedRows)) {
-          root.addedOrDeletedRows = delta.addedOrDeletedRows;
-          root.addedOrDeletedColumns = delta.addedOrDeletedColumns;
+        if (delta?.addedOrDeletedColumns || delta?.addedOrDeletedRows) {
+          if (delta?.addedOrDeletedColumns && delta?.addedOrDeletedColumns.length > 0) {
+            const rowKeys = Object.keys(root.data);
+            for (let i = 0; i < rowKeys.length; i++) {
+              const rowIndex = rowKeys[i];
+              const columnKeys = Object.keys(root.data[rowIndex]);
+              delta.addedOrDeletedColumns.forEach(({ index, isDelete }) => {
+                if (isDelete) {
+                  delete root.data[rowIndex][index];
+                } else {
+                  if (!columnKeys.includes(String(index))) {
+                    // @ts-ignore
+                    root.data[rowIndex][index] = {};
+                    root.data[rowIndex][index].color = '';
+                    root.data[rowIndex][index].rowIndex = Number(rowIndex);
+                    root.data[rowIndex][index].columnIndex = Number(index);
+                  }
+                }
+              });
+            }
+          }
+          if (delta?.addedOrDeletedRows && delta?.addedOrDeletedRows.length > 0) {
+            const rowKeys = Object.keys(root.data);
+            const columnKeys = Object.keys(root.data[rowKeys[0]]);
+            delta.addedOrDeletedRows.forEach(({ index, isDelete }) => {
+              if (isDelete) {
+                delete root.data[index];
+              } else {
+                const rowKeys = Object.keys(root.data);
+                if (!rowKeys.includes(String(index))) {
+                  root.data[index] = {};
+                  for (let i = 0; i < columnKeys.length; i++) {
+                    const columnKey = columnKeys[i];
+                    // @ts-ignore
+                    root.data[index][columnKey] = {};
+                    root.data[index][columnKey].color = '';
+                    root.data[index][columnKey].rowIndex = Number(index);
+                    root.data[index][columnKey].columnIndex = Number(columnKey);
+                  }
+                }
+              }
+            });
+          }
+          // root.addedOrDeletedRows = delta.addedOrDeletedRows;
+          // root.addedOrDeletedColumns = delta.addedOrDeletedColumns;
         }
 
         // todo: yorkie document에 대한 수정 부분
@@ -167,6 +209,25 @@ export default function Document() {
         for (const op of operations) {
           const { path } = op;
           const parsedPath = path.split('.');
+          // we only have remove operation for grid indices
+          if (op.type === 'remove') {
+            const isDeleteColumnOperation = parsedPath.length === 3;
+            if (isDeleteColumnOperation) {
+              const columnIndex = Number(op.key);
+              deleteGridIndices({
+                columnIndices: [columnIndex],
+                rowIndices: [],
+              });
+            } else {
+              // delete row operation
+              const rowIndex = Number(op.key);
+              deleteGridIndices({
+                columnIndices: [],
+                rowIndices: [rowIndex],
+              });
+            }
+            continue;
+          }
           if (parsedPath.length < 4) continue; // VALIDATION: include $, data, rowIndex, columnIndex
 
           const rowIndex = parsedPath[parsedPath.length - 2];
@@ -195,32 +256,32 @@ export default function Document() {
           9: {type: 'set', path: '$.addedOrDeletedRows.2', key: 'isDelete'}
           10: {type: 'add', path: '$.addedOrDeletedRows', index: 3}
          */
-        doc?.getRoot()?.addedOrDeletedRows?.forEach(({ index, isDelete }) => {
-          if (!isDelete) {
-            addGridIndices({
-              columnIndices: [],
-              rowIndices: [index],
-            });
-          } else {
-            deleteGridIndices({
-              columnIndices: [],
-              rowIndices: [index],
-            });
-          }
-        });
-        doc?.getRoot()?.addedOrDeletedColumns?.forEach(({ index, isDelete }) => {
-          if (!isDelete) {
-            addGridIndices({
-              columnIndices: [index],
-              rowIndices: [],
-            });
-          } else {
-            deleteGridIndices({
-              columnIndices: [index],
-              rowIndices: [],
-            });
-          }
-        });
+        // doc?.getRoot()?.addedOrDeletedRows?.forEach(({ index, isDelete }) => {
+        //   if (!isDelete) {
+        //     addGridIndices({
+        //       columnIndices: [],
+        //       rowIndices: [index],
+        //     });
+        //   } else {
+        //     deleteGridIndices({
+        //       columnIndices: [],
+        //       rowIndices: [index],
+        //     });
+        //   }
+        // });
+        // doc?.getRoot()?.addedOrDeletedColumns?.forEach(({ index, isDelete }) => {
+        //   if (!isDelete) {
+        //     addGridIndices({
+        //       columnIndices: [index],
+        //       rowIndices: [],
+        //     });
+        //   } else {
+        //     deleteGridIndices({
+        //       columnIndices: [index],
+        //       rowIndices: [],
+        //     });
+        //   }
+        // });
       }
     });
 

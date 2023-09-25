@@ -2150,10 +2150,10 @@ doctrine@^3.0.0:
   dependencies:
     esutils "^2.0.2"
 
-dotting@^2.0.5:
-  version "2.0.5"
-  resolved "https://registry.yarnpkg.com/dotting/-/dotting-2.0.5.tgz#bb67fed06b06b3f48601cc79adca316a6dfc5ab7"
-  integrity sha512-J2Fve0jBANCOEx8au+1mXS+qhu6BQKGGIYQg50g3Z7aNa1gW2SxiqXxdt3x+7KLi2Oeyfg3Ey1RXO+lU8UKteA==
+dotting@^2.0.6:
+  version "2.0.6"
+  resolved "https://registry.yarnpkg.com/dotting/-/dotting-2.0.6.tgz#c1e382e6481008f414a4bb2a62ac775236b0f2ff"
+  integrity sha512-k+hjSo/i+9lmRlcM2h3PP84ci101avAXNUMrZwgNT2IgZQwUlUZgcKClLQ/fmrqwp1IL2tHxU5dWhvEIISTJ+g==
 
 easy-bem@^1.1.1:
   version "1.1.1"

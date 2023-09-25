@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
-import yorkie, { Document, Client } from 'yorkie-js-sdk';
-import anonymous from 'anonymous-animals-gen';
 import { PixelModifyItem } from 'dotting';
+import anonymous from 'anonymous-animals-gen';
+import yorkie, { Client, Document } from 'yorkie-js-sdk';
 import randomColor from 'randomcolor';
 
 import { DottingDoc } from '../types/document';
@@ -75,6 +75,13 @@ export default function usePeer({ docId, dataArray, setData }) {
             pixelArray[pixelArray.length - 1].push(item);
           });
         });
+
+        // 초기 세팅 시 정렬된 상태로 보여주기 위함
+        pixelArray.sort((a, b) => a[0].rowIndex - b[0].rowIndex);
+        pixelArray.forEach((innerArray) => {
+          innerArray.sort((a, b) => a.columnIndex - b.columnIndex);
+        });
+
         setData(pixelArray);
       }
     }, 'Initialize default Dotting Document fields if not exists');

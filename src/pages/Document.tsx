@@ -10,8 +10,6 @@ import {
   useDotting,
   useHandlers,
 } from 'dotting';
-import LogoImage from '../assets/logo.svg';
-import useInitialization from '../hooks/useInitialization';
 import Menu from '../components/Menu';
 import Peers from '../components/Peers';
 import Palette from '../components/Palette';
@@ -20,6 +18,10 @@ import ControlTools from '../components/ControlTools';
 import { CreateInitialDataArray } from '../utils/data';
 import { useDottingContext } from '../context/DottingContext';
 import { useDocumentContext } from '../context/DocumentContext';
+import useInitialization from '../hooks/useInitialization';
+
+import LogoImage from '../assets/logo.svg';
+import { GITHUB_URL } from '../constant/urls';
 import { CONTROLLER_CLASS, LOGO_CLASS, MAIN_CLASS } from '../styles/styleClass';
 
 export default function Document() {
@@ -251,7 +253,7 @@ export default function Document() {
       <Peers user={currentClient} peers={peersExceptCurrentClient} />
 
       <div className={LOGO_CLASS}>
-        <a target='_blank' href={'https://github.com/lerrybe/collab-dotting'}>
+        <a target='_blank' href={GITHUB_URL}>
           <img src={LogoImage} alt='logo' className='w-full h-full' />
         </a>
       </div>

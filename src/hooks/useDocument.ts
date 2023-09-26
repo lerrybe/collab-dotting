@@ -1,14 +1,13 @@
 import { useEffect, useMemo, useState } from 'react';
+import randomColor from 'randomcolor';
 import { PixelModifyItem } from 'dotting';
 import anonymous from 'anonymous-animals-gen';
 import yorkie, { Client, Document } from 'yorkie-js-sdk';
-import randomColor from 'randomcolor';
-
 import { DottingDoc } from '../types/document';
 
-export default function usePeer({ docId, dataArray, setData }) {
-  const [doc, setDoc] = useState<Document<DottingDoc>>();
+export default function useDocument({ docId, dataArray, setData }) {
   const [client, setClient] = useState<Client>();
+  const [doc, setDoc] = useState<Document<DottingDoc>>();
   const [isMultiplayerReady, setIsMultiplayerReady] = useState<boolean>(false);
   const isDataLoaded = useMemo(() => {
     return dataArray.length !== 0;
@@ -45,7 +44,7 @@ export default function usePeer({ docId, dataArray, setData }) {
     });
   };
 
-  const initializeRemoteData = (dataArray, setData) => {
+  const initializeDocumentData = (dataArray, setData) => {
     doc?.update((root) => {
       if (!root.data) {
         root.data = {};
@@ -76,7 +75,6 @@ export default function usePeer({ docId, dataArray, setData }) {
           });
         });
 
-        // 초기 세팅 시 정렬된 상태로 보여주기 위함
         pixelArray.sort((a, b) => a[0].rowIndex - b[0].rowIndex);
         pixelArray.forEach((innerArray) => {
           innerArray.sort((a, b) => a.columnIndex - b.columnIndex);
@@ -108,7 +106,7 @@ export default function usePeer({ docId, dataArray, setData }) {
     if (!isDataLoaded) return;
 
     attachDocument(client, doc).then(() => {
-      initializeRemoteData(dataArray, setData);
+      initializeDocumentData(dataArray, setData);
     });
   }, [client, doc, isDataLoaded]);
 

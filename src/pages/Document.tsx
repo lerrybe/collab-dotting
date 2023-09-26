@@ -131,6 +131,7 @@ export default function Document() {
       if (event.type === 'remote-change') {
         const { operations } = event.value;
 
+        const rowsToDelete = [];
         const deletedColumns = [];
         const pixelsToColor: PixelModifyItem[] = [];
 
@@ -140,47 +141,56 @@ export default function Document() {
 
           if (op.type === 'remove') {
             const isDeleteRowOperation = parsedPath.length === 2;
+            const isDeleteColumnOperation = parsedPath.length === 3;
+
+            // Deleting row operation
             if (isDeleteRowOperation) {
-              // Deleting row operation
               const rowIndex = Number(op.key);
+              rowsToDelete.push(rowIndex);
               deleteGridIndices({
-                rowIndices: [rowIndex],
                 columnIndices: [],
+                rowIndices: [rowIndex],
               });
-            } else {
-              // Deleting column operation
+            }
+
+            // Deleting column operation
+            if (isDeleteColumnOperation) {
               const columnIndex = Number(op.key);
               if (deletedColumns.length === 0 || !deletedColumns.includes(columnIndex)) {
                 deletedColumns.push(columnIndex);
                 deleteGridIndices({
-                  rowIndices: [],
                   columnIndices: [columnIndex],
+                  rowIndices: [],
                 });
               }
             }
-            continue;
           }
 
           // Coloring operation
-          if (parsedPath.length < 4) continue; // VALIDATION: include $, data, rowIndex, columnIndex
+          if (op.type === 'set') {
+            if (parsedPath.length < 4) continue; // VALIDATION: include $, data, rowIndex, columnIndex
 
-          const rowIndex = parsedPath[parsedPath.length - 2];
-          const columnIndex = parsedPath[parsedPath.length - 1];
-          const color = doc.getRoot().data[rowIndex][columnIndex].color;
-          pixelsToColor.push({
-            color,
-            rowIndex: Number(rowIndex),
-            columnIndex: Number(columnIndex),
-          });
+            const rowIndex = parsedPath[parsedPath.length - 2];
+            const columnIndex = parsedPath[parsedPath.length - 1];
+            const color = doc.getRoot().data[rowIndex][columnIndex].color;
+            pixelsToColor.push({
+              color,
+              rowIndex: Number(rowIndex),
+              columnIndex: Number(columnIndex),
+            });
+          }
         }
-        colorPixels(pixelsToColor);
+
+        if (pixelsToColor.length > 0) {
+          colorPixels(pixelsToColor.filter(({ rowIndex }) => !rowsToDelete.includes(rowIndex)));
+        }
       }
     });
 
     return () => {
       subscribe();
     };
-  }, [client, isMultiplayerReady]);
+  }, [doc, client, isMultiplayerReady]);
 
   /* [Subscribe] remote peer changes */
   useEffect(() => {

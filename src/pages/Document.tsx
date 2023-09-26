@@ -11,7 +11,7 @@ import {
   useHandlers,
 } from 'dotting';
 import LogoImage from '../assets/logo.svg';
-import useDocument from '../hooks/useDocument';
+import useInitialization from '../hooks/useInitialization';
 import Menu from '../components/Menu';
 import Peers from '../components/Peers';
 import Palette from '../components/Palette';
@@ -34,7 +34,7 @@ export default function Document() {
 
   /* Get data from hook */
   const { isGridFixed, isGridVisible, isPanZoomEnable } = useDottingContext();
-  const { doc, client, isMultiplayerReady } = useDocument({ docId, dataArray, setData });
+  const { doc, client, isMultiplayerReady } = useInitialization({ docId, dataArray, setData });
 
   /* Manage Peer */
   const { currentClient, peersExceptCurrentClient, syncPeers } = useDocumentContext();
@@ -43,13 +43,14 @@ export default function Document() {
   const clearData = useCallback(() => {
     if (!confirm('Are you sure you want to clear the canvas and all histories?')) return;
     clear();
-    doc?.update((root) => {
-      dataArray?.forEach((row) => {
-        row.forEach(({ rowIndex, columnIndex }) => {
-          root.data[rowIndex][columnIndex].color = '';
-        });
-      });
-    });
+    // TODO: when clear, delta will be updated
+    // doc?.update((root) => {
+    //   dataArray?.forEach((row) => {
+    //     row.forEach(({ rowIndex, columnIndex }) => {
+    //       root.data[rowIndex][columnIndex].color = '';
+    //     });
+    //   });
+    // });
   }, [dataArray]);
 
   /* [Update] remote document data */

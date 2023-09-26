@@ -5,7 +5,7 @@ import anonymous from 'anonymous-animals-gen';
 import yorkie, { Client, Document } from 'yorkie-js-sdk';
 import { DottingDoc } from '../types/document';
 
-export default function useDocument({ docId, dataArray, setData }) {
+export default function useInitialization({ docId, dataArray, setData }) {
   const [client, setClient] = useState<Client>();
   const [doc, setDoc] = useState<Document<DottingDoc>>();
   const [isMultiplayerReady, setIsMultiplayerReady] = useState<boolean>(false);

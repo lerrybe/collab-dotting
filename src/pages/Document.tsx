@@ -60,16 +60,6 @@ export default function Document() {
     if (!isMultiplayerReady) return;
 
     const handleDataChangeHandler: CanvasDataChangeHandler = ({ isLocalChange, delta, data }) => {
-      /* Update color change */
-      doc?.update((root) => {
-        if (isLocalChange && delta?.modifiedPixels) {
-          delta?.modifiedPixels?.forEach((item) => {
-            const { color, rowIndex, columnIndex } = item;
-            root.data[rowIndex][columnIndex].color = color;
-          });
-        }
-      });
-
       /* Update grids */
       doc?.update((root) => {
         if (isLocalChange && (delta?.addedOrDeletedColumns || delta?.addedOrDeletedRows)) {
@@ -115,6 +105,16 @@ export default function Document() {
               }
             });
           }
+        }
+      });
+
+      /* Update color change */
+      doc?.update((root) => {
+        if (isLocalChange && delta?.modifiedPixels) {
+          delta?.modifiedPixels?.forEach((item) => {
+            const { color, rowIndex, columnIndex } = item;
+            root.data[rowIndex][columnIndex].color = color;
+          });
         }
       });
     };
